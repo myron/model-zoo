@@ -35,7 +35,7 @@ Output: ISUP grade class label
 
 # Model Performance
 The model was trained with our own split, as shown in the datalist json file in config folder. 
-The achieved QWK scores on the testing data are: 0.8920
+The achieved QWK scores on the testing data are: 0.9071
 
 
 ## Training Performance

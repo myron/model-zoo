@@ -20,7 +20,7 @@
     "label_classes": "5 classes, ISUP grade",
     "pred_classes": "5 classes, ISUP grade",
     "eval_metrics": {
-        "QWK": 0.8920
+        "QWK": 0.9071
     },
     "intended_use": "This is an example, not to be used for diagnostic purposes",
     "references": [
