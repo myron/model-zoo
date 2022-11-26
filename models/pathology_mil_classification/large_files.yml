@@ -1,5 +1,5 @@
-# large_files:
-#   - path: "models/model.pt"
-#     url: "https://drive.google.com/file/d/1UFERbDK-Q1hKHqH-shKFcEIE-WPvYMN_/view?usp=sharing"
-#     hash_val: "870e677b782a5184cbc48db1456b78e8"
-#     hash_type: "md5"
+large_files:
+  - path: "models/model.pt"
+    url: "https://drive.google.com/file/d/15wlGDdrzaNwUaouMjNElb8v68m4XO2nt/view?usp=sharing"
+    hash_val: "5a9f0ad158e7e074361377cf0b4b0757"
+    hash_type: "md5"
