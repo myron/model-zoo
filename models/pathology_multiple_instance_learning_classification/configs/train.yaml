@@ -1,0 +1,261 @@
+imports:
+- "$import os"
+- "$import ignite"
+- "$from scripts.utils import LabelEncodeIntegerGraded, LabelDecodeIntegerGraded, list_data_collate, write_csv_row, PatchInferer"
+
+amp: true                                                     
+epochs: 50                                                    
+weight_decay: 0                                               
+val_every: 1                                                 
+tile_count: 44                                            
+tile_size: 256                                        
+num_classes: 5                                          
+batch_size: 4                                 
+workers: 2                                               
+optim_lr: 3.e-5  
+
+image_key: image
+label_key: label
+val_interval: @val_every
+
+input_channels: 3
+output_classes: 5
+
+bundle_root: "./"
+device: "cuda"
+
+dataset_dir: /data/PandaChallenge2020/train_images  
+data_list_file_path: "$@bundle_root + '/scripts/datalist_panda_0.json'"
+datalist: "$monai.data.load_decathlon_datalist(@data_list_file_path, data_list_key='testing', base_dir=@dataset_dir)"   
+output_dir: "$@bundle_root + '/eval'"
+ckpt_dir: "$@bundle_root + '/models'"
+
+train_datalist: "$monai.data.load_decathlon_datalist(@data_list_file_path, data_list_key='training',
+  base_dir=@dataset_dir)"
+val_datalist: "$monai.data.load_decathlon_datalist(@data_list_file_path, data_list_key='validation',
+  base_dir=@dataset_dir)"
+
+network_def:
+  _target_: monai.networks.nets.milmodel
+  num_classes: "@output_classes"
+  pretrained: false
+  mil_mode: att_trans
+
+network: "$@network_def.to(@device)"
+
+loss:
+  _target_: torch.nn.BCEWithLogitsLoss
+
+optimizer:
+  _target_: torch.optim.AdamW
+  params: "$@network.parameters()"
+  weight_decay: @weight_decay
+  lr: @optim_lr
+
+
+lr_scheduler:
+  _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+  optimizer: @optimizer
+  T_max: @epochs
+  eta_min: 0
+
+train:
+  preprocessing:
+    _target_: Compose
+    transforms:
+    - _target_: LoadImaged
+      keys: image
+      reader: "$WSIReader" 
+      backend: cucim
+      dtype: "$np.uint8"
+      level: 1
+      image_only: true
+    - _target_: CopyItemsd
+      keys: "label"
+      times: 1
+      names: "label_save"
+    - _target_: LabelEncodeIntegerGraded
+      keys: label
+      num_classes: "@output_classes"
+      allow_missing_keys: true
+    - _target_: RandGridPatchd
+      keys: image
+      patch_size: "$[@tile_size, @tile_size]"
+      num_patches: @tile_count
+      sort_fn: "min"
+      pad_mode: null
+      constant_values: 255
+    - _target_: SplitDimd
+      keys: image
+      dim: 0
+      keepdim: false
+      list_output: true 
+    - _target_: RandFlipd
+      keys: image
+      spatial_axis: 0
+      prob: 0.5
+    - _target_: RandFlipd
+      keys: image
+      spatial_axis: 1
+      prob: 0.5
+    - _target_: RandRotate90d
+      keys: image
+      prob: 0.5
+    - _target_: ScaleIntensityRanged
+      keys: image
+      a_min: "$np.float32(255)"
+      a_max: "$np.float32(0)"
+    - _target_: ToTensord
+      keys: ["image", "label", "label_save"]
+
+  dataset:
+    _target_: Dataset
+    data: "@train_datalist"
+    transform: "@train#preprocessing"
+
+  dataloader:
+    _target_: DataLoader
+    dataset: "@train#dataset"
+    batch_size: @batch_size
+    shuffle: true
+    num_workers: @workers
+    pin_memory: True
+    collate_fn: "$list_data_collate"
+
+  inferer:
+    _target_: SimpleInferer
+
+  postprocessing: 
+    _target_: LabelDecodeIntegerGraded
+    keys: pred
+
+  handlers:
+  - _target_: LrScheduleHandler
+    lr_scheduler: "@lr_scheduler"
+    print_lr: true
+  - _target_: ValidationHandler
+    validator: "@validate#evaluator"
+    epoch_level: true
+    interval: "@val_interval"
+  - _target_: StatsHandler
+    tag_name: train_loss
+    output_transform: "$monai.handlers.from_engine(['loss'], first=True)"
+  - _target_: TensorBoardStatsHandler
+    log_dir: "@output_dir"
+    tag_name: train_loss
+    output_transform: "$monai.handlers.from_engine(['loss'], first=True)"
+  key_metric:
+    train_accuracy:
+      _target_: ignite.metrics.Accuracy  
+      output_transform: "$monai.handlers.from_engine(['pred', 'label_save'])"
+
+  trainer:
+    _target_: SupervisedTrainer
+    max_epochs: @epochs
+    device: "@device"
+    train_data_loader: "@train#dataloader"
+    network: "@network"
+    loss_function: "@loss"
+    optimizer: "@optimizer"
+    inferer: "@train#inferer"
+    postprocessing: "@train#postprocessing"
+    key_train_metric: "@train#key_metric"
+    train_handlers: "@train#handlers"
+    amp: @amp
+
+
+validate:
+  preprocessing:
+    _target_: Compose
+    transforms:
+    - _target_: LoadImaged
+      keys: image
+      reader: "$WSIReader" 
+      backend: cucim
+      dtype: "$np.uint8"
+      level: 1
+      image_only: true
+    - _target_: CopyItemsd
+      keys: "label"
+      times: 1
+      names: "label_save"
+    - _target_: LabelEncodeIntegerGraded
+      keys: label
+      num_classes: "@output_classes"
+      allow_missing_keys: true
+    - _target_: GridPatchd
+      keys: image
+      patch_size: "$[@tile_size, @tile_size]"
+      threshold: "$ 0.999 * 3 * 255 * @tile_size * @tile_size"
+      pad_mode: null
+      constant_values: 255
+    - _target_: SplitDimd
+      keys: image
+      dim: 0
+      keepdim: false
+      list_output: true 
+    - _target_: ScaleIntensityRanged
+      keys: image
+      a_min: "$np.float32(255)"
+      a_max: "$np.float32(0)"
+    - _target_: ToTensord
+      keys: ["image", "label", "label_save"]
+
+  dataset:
+    _target_: Dataset
+    data: "@val_datalist"
+    transform: "@validate#preprocessing"
+
+  dataloader:
+    _target_: DataLoader
+    dataset: "@validate#dataset"
+    batch_size: 1
+    shuffle: false
+    num_workers: @workers
+    pin_memory: True
+    collate_fn: "$list_data_collate"
+
+  inferer:
+    _target_: PatchInferer
+    max_tiles: @tile_count
+    amp: @amp
+
+  postprocessing: "%train#postprocessing"
+
+  handlers:
+  - _target_: StatsHandler
+    iteration_log: false
+  - _target_: TensorBoardStatsHandler
+    log_dir: "@output_dir"
+    iteration_log: false
+  - _target_: CheckpointSaver
+    save_dir: "@ckpt_dir"
+    save_dict:
+      model: "@network"
+    save_key_metric: true
+    key_metric_filename: model.pt
+  key_metric:
+    val_acc:
+      _target_: ignite.metrics.Accuracy 
+      output_transform: "$monai.handlers.from_engine(['pred', 'label_save'])"
+
+  # additional_metrics:
+  #   val_accuracy:
+  #     _target_: ignite.metrics.Accuracy
+  #     output_transform: "$monai.handlers.from_engine(['pred', 'label_save'])"
+
+  evaluator:
+    _target_: SupervisedEvaluator
+    device: "@device"
+    val_data_loader: "@validate#dataloader"
+    network: "@network"
+    inferer: "@validate#inferer"
+    postprocessing: "@validate#postprocessing"
+    key_val_metric: "@validate#key_metric"
+    additional_metrics: "@validate#additional_metrics"
+    val_handlers: "@validate#handlers"
+    amp: @amp
+
+training:
+- "$setattr(torch.backends.cudnn, 'benchmark', True)"
+- "$@train#trainer.run()"
