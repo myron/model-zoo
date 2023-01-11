@@ -107,7 +107,7 @@ train:
       a_min: "$np.float32(255)"
       a_max: "$np.float32(0)"
     - _target_: ToTensord
-      keys: ["image", "label"]
+      keys: ["image", "label", "label_save"]
 
   dataset:
     _target_: Dataset
@@ -200,7 +200,7 @@ validate:
       a_min: "$np.float32(255)"
       a_max: "$np.float32(0)"
     - _target_: ToTensord
-      keys: ["image", "label"]
+      keys: ["image", "label", "label_save"]
 
   dataset:
     _target_: Dataset
