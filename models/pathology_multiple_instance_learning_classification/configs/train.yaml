@@ -127,7 +127,7 @@ train:
     _target_: SimpleInferer
 
   postprocessing: 
-    _target_: LabelDecodeIntegerGraded
+    _target_: scripts.utils.LabelDecodeIntegerGraded
     keys: pred
 
   handlers:
@@ -217,7 +217,7 @@ validate:
     collate_fn: "$lambda x: scripts.utils.list_data_collate(x)"
 
   inferer:
-    _target_: PatchInferer
+    _target_: scripts.utils.PatchInferer
     max_tiles: "@tile_count"
     amp: "@amp"
 
