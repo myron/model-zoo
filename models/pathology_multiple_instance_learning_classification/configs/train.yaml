@@ -74,7 +74,7 @@ train:
       keys: "label"
       times: 1
       names: "label_save"
-    - _target_: "$LabelEncodeIntegerGraded"
+    - _target_: scripts.utils.LabelEncodeIntegerGraded
       keys: label
       num_classes: "@output_classes"
       allow_missing_keys: true
@@ -179,7 +179,7 @@ validate:
       keys: "label"
       times: 1
       names: "label_save"
-    - _target_: "$LabelEncodeIntegerGraded"
+    - _target_: scripts.utils.LabelEncodeIntegerGraded
       keys: label
       num_classes: "@output_classes"
       allow_missing_keys: true
