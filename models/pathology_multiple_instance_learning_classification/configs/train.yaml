@@ -120,7 +120,7 @@ train:
     shuffle: true
     num_workers: "@workers"
     pin_memory: True
-    collate_fn: "$list_data_collate"
+    collate_fn: "$scripts.utils.list_data_collate"
 
   inferer:
     _target_: SimpleInferer
@@ -213,7 +213,7 @@ validate:
     shuffle: false
     num_workers: "@workers"
     pin_memory: True
-    collate_fn: "$list_data_collate"
+    collate_fn: "$scripts.utils.list_data_collate"
 
   inferer:
     _target_: PatchInferer
