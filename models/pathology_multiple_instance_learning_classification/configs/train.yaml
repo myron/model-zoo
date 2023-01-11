@@ -16,7 +16,7 @@ optim_lr: 3.e-5
 
 image_key: image
 label_key: label
-val_interval: @val_every
+val_interval: "@val_every"
 
 input_channels: 3
 output_classes: 5
@@ -49,14 +49,14 @@ loss:
 optimizer:
   _target_: torch.optim.AdamW
   params: "$@network.parameters()"
-  weight_decay: @weight_decay
-  lr: @optim_lr
+  weight_decay: "@weight_decay"
+  lr: "@optim_lr"
 
 
 lr_scheduler:
   _target_: torch.optim.lr_scheduler.CosineAnnealingLR
-  optimizer: @optimizer
-  T_max: @epochs
+  optimizer: "@optimizer"
+  T_max: "@epochs"
   eta_min: 0
 
 train:
@@ -81,7 +81,7 @@ train:
     - _target_: RandGridPatchd
       keys: image
       patch_size: "$[@tile_size, @tile_size]"
-      num_patches: @tile_count
+      num_patches: "@tile_count"
       sort_fn: "min"
       pad_mode: null
       constant_values: 255
@@ -116,9 +116,9 @@ train:
   dataloader:
     _target_: DataLoader
     dataset: "@train#dataset"
-    batch_size: @batch_size
+    batch_size: "@batch_size"
     shuffle: true
-    num_workers: @workers
+    num_workers: "@workers"
     pin_memory: True
     collate_fn: "$list_data_collate"
 
@@ -151,7 +151,7 @@ train:
 
   trainer:
     _target_: SupervisedTrainer
-    max_epochs: @epochs
+    max_epochs: "@epochs"
     device: "@device"
     train_data_loader: "@train#dataloader"
     network: "@network"
@@ -161,7 +161,7 @@ train:
     postprocessing: "@train#postprocessing"
     key_train_metric: "@train#key_metric"
     train_handlers: "@train#handlers"
-    amp: @amp
+    amp: "@amp"
 
 
 validate:
@@ -217,8 +217,8 @@ validate:
 
   inferer:
     _target_: PatchInferer
-    max_tiles: @tile_count
-    amp: @amp
+    max_tiles: "@tile_count"
+    amp: "@amp"
 
   postprocessing: "%train#postprocessing"
 
@@ -254,7 +254,7 @@ validate:
     key_val_metric: "@validate#key_metric"
     additional_metrics: "@validate#additional_metrics"
     val_handlers: "@validate#handlers"
-    amp: @amp
+    amp: "@amp"
 
 training:
 - "$setattr(torch.backends.cudnn, 'benchmark', True)"
