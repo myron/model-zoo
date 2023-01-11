@@ -2,7 +2,7 @@ imports:
 - "$import os"
 - "$import ignite"
 - "$import scripts.utils"
-# - "$from scripts.utils import LabelEncodeIntegerGraded, LabelDecodeIntegerGraded, list_data_collate, write_csv_row, PatchInferer"
+- "$from scripts.utils import LabelEncodeIntegerGraded, LabelDecodeIntegerGraded, list_data_collate, write_csv_row, PatchInferer"
 
 amp: true                                                     
 epochs: 50                                                    
@@ -121,7 +121,7 @@ train:
     shuffle: true
     num_workers: "@workers"
     pin_memory: True
-    collate_fn: "$lambda x: scripts.utils.list_data_collate(x)"
+    collate_fn: "$lambda x: list_data_collate(x)"
 
   inferer:
     _target_: SimpleInferer
@@ -214,7 +214,7 @@ validate:
     shuffle: false
     num_workers: "@workers"
     pin_memory: True
-    collate_fn: "$lambda x: scripts.utils.list_data_collate(x)"
+    collate_fn: "$lambda x: list_data_collate(x)"
 
   inferer:
     _target_: scripts.utils.PatchInferer
