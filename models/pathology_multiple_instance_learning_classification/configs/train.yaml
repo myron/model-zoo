@@ -37,7 +37,7 @@ val_datalist: "$monai.data.load_decathlon_datalist(@data_list_file_path, data_li
   base_dir=@dataset_dir)"
 
 network_def:
-  _target_: monai.networks.nets.milmodel
+  _target_: MILModel
   num_classes: "@output_classes"
   pretrained: false
   mil_mode: att_trans
