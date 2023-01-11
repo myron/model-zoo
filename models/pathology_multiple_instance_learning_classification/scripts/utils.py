@@ -90,6 +90,8 @@ class LabelDecodeIntegerGraded(MapTransform):
 
     def __call__(self, data):
 
+        print('LabelDecodeIntegerGraded keys', data.keys())
+        
         d = dict(data)
         for key in self.keys:
             # d[key] = d[key].sigmoid().sum(1).detach().round()
