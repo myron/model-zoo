@@ -148,7 +148,8 @@ train:
   key_metric:
     train_accuracy:
       _target_: ignite.metrics.Accuracy  
-      output_transform: "$lambda data: [print('x', len(x), x); x.sigmoid().sum(0).detach().round() for x in monai.handlers.from_engine(['pred', 'label'])(data)]"
+      # output_transform: "$lambda data: [print('x', len(x), x); x.sigmoid().sum(0).detach().round() for x in monai.handlers.from_engine(['pred', 'label'])(data)]"
+      output_transform: "$lambda data: print(monai.handlers.from_engine(['pred', 'label'])(data))"
 
   trainer:
     _target_: SupervisedTrainer
