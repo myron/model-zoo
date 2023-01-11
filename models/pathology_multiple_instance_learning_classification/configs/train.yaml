@@ -71,10 +71,10 @@ train:
       dtype: "$np.uint8"
       level: 1
       image_only: true
-    - _target_: CopyItemsd
-      keys: "label"
-      times: 1
-      names: "label_save"
+    # - _target_: CopyItemsd
+    #   keys: "label"
+    #   times: 1
+    #   names: "label_save"
     - _target_: scripts.utils.LabelEncodeIntegerGraded
       keys: label
       num_classes: "@output_classes"
@@ -176,10 +176,10 @@ validate:
       dtype: "$np.uint8"
       level: 1
       image_only: true
-    - _target_: CopyItemsd
-      keys: "label"
-      times: 1
-      names: "label_save"
+    # - _target_: CopyItemsd
+    #   keys: "label"
+    #   times: 1
+    #   names: "label_save"
     - _target_: scripts.utils.LabelEncodeIntegerGraded
       keys: label
       num_classes: "@output_classes"
