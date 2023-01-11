@@ -148,7 +148,7 @@ train:
   key_metric:
     train_accuracy:
       _target_: ignite.metrics.Accuracy  
-      output_transform: "$monai.handlers.from_engine(['pred', 'label_save'])"
+      output_transform: "$monai.handlers.from_engine(['pred', 'label'])"
 
   trainer:
     _target_: SupervisedTrainer
@@ -238,7 +238,7 @@ validate:
   key_metric:
     val_acc:
       _target_: ignite.metrics.Accuracy 
-      output_transform: "$monai.handlers.from_engine(['pred', 'label_save'])"
+      output_transform: "$monai.handlers.from_engine(['pred', 'label'])"
 
   # additional_metrics:
   #   val_accuracy:
