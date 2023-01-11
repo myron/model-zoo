@@ -107,7 +107,7 @@ train:
       a_min: "$np.float32(255)"
       a_max: "$np.float32(0)"
     - _target_: ToTensord
-      keys: ["image", "label", "label_save"]
+      keys: ["image", "label"]
 
   dataset:
     _target_: Dataset
@@ -148,7 +148,7 @@ train:
   key_metric:
     train_accuracy:
       _target_: ignite.metrics.Accuracy  
-      output_transform: "$label_decode(monai.handlers.from_engine(['pred', 'label_save']))"
+      output_transform: "$[x.sigmoid().sum(0).detach().round() for x in monai.handlers.from_engine(['pred', 'label'])]"
 
   trainer:
     _target_: SupervisedTrainer
@@ -200,7 +200,7 @@ validate:
       a_min: "$np.float32(255)"
       a_max: "$np.float32(0)"
     - _target_: ToTensord
-      keys: ["image", "label", "label_save"]
+      keys: ["image", "label"]
 
   dataset:
     _target_: Dataset
@@ -238,7 +238,7 @@ validate:
   key_metric:
     val_acc:
       _target_: ignite.metrics.Accuracy 
-      output_transform: "$label_decode(monai.handlers.from_engine(['pred', 'label']))"
+      output_transform: "$[x.sigmoid().sum(0).detach().round() for x in monai.handlers.from_engine(['pred', 'label'])]"
 
   # additional_metrics:
   #   val_accuracy:
