@@ -65,7 +65,7 @@ train:
     transforms:
     - _target_: LoadImaged
       keys: image
-      reader: "$WSIReader" 
+      reader: "$monai.data.wsi_reader.WSIReader" 
       backend: cucim
       dtype: "$np.uint8"
       level: 1
@@ -170,7 +170,7 @@ validate:
     transforms:
     - _target_: LoadImaged
       keys: image
-      reader: "$WSIReader" 
+      reader: "$monai.data.wsi_reader.WSIReader" 
       backend: cucim
       dtype: "$np.uint8"
       level: 1
