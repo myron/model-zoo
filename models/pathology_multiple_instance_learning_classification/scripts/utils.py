@@ -91,7 +91,7 @@ class LabelDecodeIntegerGraded(MapTransform):
     def __call__(self, data):
 
         print('LabelDecodeIntegerGraded keys', data.keys())
-        
+
         d = dict(data)
         for key in self.keys:
             # d[key] = d[key].sigmoid().sum(1).detach().round()
@@ -99,7 +99,10 @@ class LabelDecodeIntegerGraded(MapTransform):
 
         return d
 
-
+def label_decode(xall):
+    print('label_decode', xall.shape)
+    xall = [x.sigmoid().sum(0).detach().round() for x in xall]
+    return xall
 
 def list_data_collate(batch: collections.abc.Sequence):
     """
