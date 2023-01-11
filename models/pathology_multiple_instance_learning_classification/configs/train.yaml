@@ -211,7 +211,7 @@ validate:
     dataset: "@validate#dataset"
     batch_size: 1
     shuffle: false
-    num_workers: @workers
+    num_workers: "@workers"
     pin_memory: True
     collate_fn: "$list_data_collate"
 
