@@ -187,7 +187,7 @@ validate:
     - _target_: GridPatchd
       keys: image
       patch_size: "$[@tile_size, @tile_size]"
-      threshold: "$0.999 * 3 * 255 * @tile_size * @tile_size"
+      threshold: "$0.999*3*255*@tile_size*@tile_size"
       pad_mode: null
       constant_values: 255
     - _target_: SplitDimd
