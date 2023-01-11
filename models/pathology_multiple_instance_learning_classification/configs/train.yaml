@@ -2,7 +2,7 @@ imports:
 - "$import os"
 - "$import ignite"
 - "$import scripts.utils"
-- "$from scripts.utils import LabelEncodeIntegerGraded, LabelDecodeIntegerGraded, list_data_collate, write_csv_row, PatchInferer"
+- "$from .scripts.utils import list_data_collate"
 
 amp: true                                                     
 epochs: 50                                                    
