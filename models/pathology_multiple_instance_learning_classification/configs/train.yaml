@@ -253,7 +253,7 @@ validate:
     inferer: "@validate#inferer"
     postprocessing: "@validate#postprocessing"
     key_val_metric: "@validate#key_metric"
-    additional_metrics: "@validate#additional_metrics"
+    # additional_metrics: "@validate#additional_metrics"
     val_handlers: "@validate#handlers"
     amp: "@amp"
 
